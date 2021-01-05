@@ -67,7 +67,7 @@ function keepURL(){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>購物車練習</title>
+    <title>購物車練習-首頁</title>
 </head>
 
 <body>
