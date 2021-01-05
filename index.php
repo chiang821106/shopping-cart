@@ -106,6 +106,69 @@ function keepURL(){
         </ul>
 
     </div>
+    <!-- 顯示商品列表 -->
+    <div class="actionDiv"><a href="cart.php">我的購物車</a></div>
+    <?php
+    //加上限制顯示筆數的SQL敘述句，由本頁開始記錄筆數開始，每頁顯示預設筆數
+    $query_limit_RecProduct = $query_RecProduct." LIMIT {$startRow_records} , {$pageRow_records}";
+    //以加上限制顯示筆數的SQL敘述句查詢資料到$RecProduct中
+    $stmt = $db_link->prepare($query_limit_RecProduct);
+    //若有分類關鍵字時未加上限制顯示筆數的SQL敘述句
+    if(isset($_GET['cid']) && ($_GET['cid']!="")){
+        $stmt->bind_param('i',$_GET['cid']);
+    //若有搜尋關鍵字時未加上限制顯示筆數的SQL敘述句
+    }elseif(isset($_GET['keyword']) && ($_GET['keyword']!="")){
+        $keyword = "%".$_GET['Keyword']."%";
+        $stmt->bind_param('ss',$keyword,$keyword);
+    //若有價格區間關鍵字未加限制顯示筆數的SQL敘述句
+    }elseif(isset($_GET['price1']) && isset($_GET['price2']) && ($_GET['price1']<=$_GET['price2'])){
+      $stmt->bind_param('ii',$_GET['price1'],$_GET['price2']);  
+    }
+    $stmt->execute();
+    $RecProduct = $stmt->get_result();
+    while($row_RecProduct = $RecProduct->fetch_assoc()){;
+    ?>
+    <div class="albumDiv">
+        <div class="picDiv"><a href="product.php?id=<?php echo $row_RecProduct['productid']; ?>">
+                <?php if($row_RecProduct['productimages']=="") { ?>
+                <img src="images/nopic.png" alt="暫無圖片" width="120" height="120" border="0">
+                <?php }else{ ?>
+                <img src="proimg/<?php echo $row_RecProduct['productimages'];?>"
+                    alt="<?php echo $row_RecProduct['productname']; ?>" width="135" height="135" border="0">
+                <?php } ?>
+            </a></div>
+        <div class="albuminfo"><a
+                href="product.php?id=<?php echo $row_RecProduct['productid']; ?>"><?php echo $row_RecProduct['productname']; ?></a><br />
+            <span class="smalltext">特價</span><span
+                class="redword"><?php echo $row_RecProduct['productprice']; ?></span><span class="smalltext"> 元</span>
+        </div>
+    </div>
+    <?php } ?>
+
+    <!-- 顯示分頁導覽頁 -->
+    <?php if($num_pages > 1) { //若不是第一頁則顯示 ?>
+    <a href="?page=1<?php echo keepURL(); ?>">|&lt;</a>
+    <a href="?page=<?php echo $num_pages-1; ?><?php echo keepURL();?>">&lt;&lt;</a>
+    <?php }else{ ?>
+    |&lt; &lt;&lt;
+    <?php } ?>
+    <?php 
+    for($i=1;$i<$total_pages;$i++){
+        if($i==$num_pages){
+            echo $i." ";
+        }else{
+            $urlstr = keepURL();
+            echo "<a href=\"?page=$i$urlstr\"?$i</a> ";
+        }
+    }
+    ?>
+    <?php if($num_pages < $total_pages) { //若不是最後一頁則顯示 ?>
+    <a href="?page=<?php echo $num_pages+1; ?><?php echo keepURL(); ?>">&gt;&gt;</a>
+    <a href="?page=<?php echo $total_pages; ?><?php echo keepURL(); ?>">&gt;|</a>
+    <?php  }else{ ?>
+    &gt;&gt; &gt;|
+    <?php } ?>
+
 </body>
 
 </html>
